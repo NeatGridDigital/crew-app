@@ -318,7 +318,7 @@ main{flex:1;padding:18px 16px 8px;position:relative}
 <script>
 (function(){
 "use strict";
-var VERSION = "402f014c92";
+var VERSION = "b51a35ae9a";
 var KEY = "synergeio.v1";
 var DAYS = ["Κυριακή","Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο"];
 var DSHORT = ["Κυρ","Δευ","Τρι","Τετ","Πεμ","Παρ","Σαβ"];
@@ -363,7 +363,7 @@ function holOf(d){return holidays(d.getFullYear())[key(d)]||""}
 /* ---------- state ---------- */
 var S;
 function uid(){return "w"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
-function fresh(){return {workers:["ACHMET","SINAN","KENAN"].map(function(n,i){return {id:"w"+(i+1),name:n,active:true}}),marks:{}}}
+function fresh(){return {workers:["NIKOS","GIORGOS","MARIOS"].map(function(n,i){return {id:"w"+(i+1),name:n,active:true}}),marks:{}}}
 function load(){
   try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&o.workers&&o.marks)return o}}catch(e){}
   return fresh();
