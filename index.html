@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Συνεργείο</title>
+<meta name="theme-color" content="#16233A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#F3F1EC; --card:#FFFFFF; --ink:#16233A; --ink2:#5B6577; --line:#E3DFD6;
+  --head:#16233A; --head2:#22345A; --gold:#D9A441;
+  --ok:#1E9E5A; --ok2:#16824A; --no:#D23C3C; --no2:#B32E2E;
+  --hol:#FFF3DA; --holInk:#9A6A12; --sun:#F7ECEC;
+  --shadow:0 1px 2px rgba(22,35,58,.06),0 6px 18px rgba(22,35,58,.07);
+  --r:20px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0F1726; --card:#18233A; --ink:#EEF1F6; --ink2:#9AA6BB; --line:#26344F;
+    --head:#0B1220; --head2:#16233A; --hol:#3A2F17; --holInk:#F0C46A; --sun:#2A2030;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.25);
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",Roboto,"Noto Sans",system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;overscroll-behavior-y:contain}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.app{max-width:640px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+
+/* header */
+header{background:linear-gradient(160deg,var(--head2),var(--head));color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 18px;
+  border-radius:0 0 28px 28px;box-shadow:0 10px 30px rgba(22,35,58,.25);position:relative;overflow:hidden}
+header::after{content:"";position:absolute;right:-60px;top:-70px;width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle,rgba(217,164,65,.22),transparent 65%);pointer-events:none}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.3px;font-size:15px;opacity:.95}
+.brand svg{width:26px;height:26px}
+.brand .sp{flex:1}
+.todayBtn{font-size:13px;font-weight:600;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.12);color:#fff;transition:background .2s,transform .15s}
+.todayBtn:active{transform:scale(.95)}
+.todayBtn[hidden]{display:none}
+.dateRow{display:flex;align-items:center;gap:6px;margin-top:14px}
+.nav{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.1);color:#fff;flex:none;transition:transform .15s,background .2s}
+.nav:active{transform:scale(.9);background:rgba(255,255,255,.2)}
+.nav svg{width:20px;height:20px}
+.dateText{flex:1;text-align:center;min-width:0}
+.dow{font-size:26px;font-weight:800;line-height:1.1}
+.dmy{font-size:15px;opacity:.8;margin-top:2px}
+.holTag{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(217,164,65,.2);color:#FFD88A}
+.holTag[hidden]{display:none}
+
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px}
+.wd{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0 7px;border-radius:14px;color:rgba(255,255,255,.75);transition:background .25s,color .25s,transform .15s}
+.wd:active{transform:scale(.93)}
+.wd .s{font-size:11px;font-weight:600;letter-spacing:.3px}
+.wd .n{font-size:17px;font-weight:700;color:#fff}
+.wd .bar{display:flex;gap:2px;height:5px}
+.wd .bar i{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.22)}
+.wd .bar i.y{background:#3DDC84}.wd .bar i.n{background:#FF6B6B}
+.wd.sel{background:#fff;color:var(--ink2)}
+.wd.sel .n{color:#16233A}
+.wd.sel .bar i{background:#DCD7CC}.wd.sel .bar i.y{background:var(--ok)}.wd.sel .bar i.n{background:var(--no)}
+.wd.today .n{text-decoration:underline;text-decoration-color:var(--gold);text-decoration-thickness:3px;text-underline-offset:4px}
+.wd.hol .s{color:var(--gold)}
+.wd.sel.hol .s{color:var(--holInk)}
+
+/* pages */
+main{flex:1;padding:18px 16px 8px;position:relative}
+.page{display:none}
+.page.on{display:block;animation:pageIn .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes pageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.summary{display:flex;gap:8px;margin-bottom:14px}
+.pill{flex:1;background:var(--card);border-radius:16px;padding:10px 12px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px}
+.pill .dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:none;color:#fff}
+.pill .dot svg{width:15px;height:15px}
+.pill b{font-size:20px;display:block;line-height:1}
+.pill span{font-size:12px;color:var(--ink2)}
+.pill.y .dot{background:var(--ok)}.pill.n .dot{background:var(--no)}
+
+.slider{position:relative}
+.dayList{display:flex;flex-direction:column;gap:12px}
+.dayList.outL{animation:outL .18s ease-in forwards}.dayList.outR{animation:outR .18s ease-in forwards}
+.dayList.inL{animation:inL .32s cubic-bezier(.2,.8,.2,1)}.dayList.inR{animation:inR .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes outL{to{opacity:0;transform:translateX(-40px)}}@keyframes outR{to{opacity:0;transform:translateX(40px)}}
+@keyframes inL{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes inR{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:none}}
+
+.worker{position:relative;overflow:hidden;border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);
+  display:flex;align-items:center;gap:14px;padding:18px 18px 18px 20px;min-height:86px;text-align:left;width:100%;
+  transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .3s;user-select:none;-webkit-user-select:none;
+  border:2px solid transparent}
+.worker:active{transform:scale(.975)}
+.worker .fill{position:absolute;border-radius:50%;width:10px;height:10px;transform:translate(-50%,-50%) scale(0);pointer-events:none}
+.worker .fill.go{animation:fill .55s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes fill{to{transform:translate(-50%,-50%) scale(var(--s))}}
+.worker .bgY,.worker .bgN{position:absolute;inset:0;opacity:0;transition:opacity .25s}
+.worker .bgY{background:linear-gradient(135deg,var(--ok),var(--ok2))}
+.worker .bgN{background:linear-gradient(135deg,var(--no),var(--no2))}
+.worker.y .bgY,.worker.n .bgN{opacity:1}
+.worker .av{position:relative;width:48px;height:48px;border-radius:50%;flex:none;display:grid;place-items:center;
+  font-weight:800;font-size:19px;background:var(--bg);color:var(--ink);transition:background .3s,color .3s}
+.worker.y .av,.worker.n .av{background:rgba(255,255,255,.2);color:#fff}
+.worker .nm{position:relative;flex:1;min-width:0}
+.worker .nm b{display:block;font-size:30px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;line-height:1.05;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .3s}
+.worker .nm span{display:block;font-size:13px;color:var(--ink2);margin-top:4px;font-weight:600;transition:color .3s}
+.worker.y .nm b,.worker.n .nm b{color:#fff}
+.worker.y .nm span,.worker.n .nm span{color:rgba(255,255,255,.88)}
+.worker .mark{position:relative;width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center;
+  border:2.5px dashed var(--line);transition:border-color .3s,background .3s,transform .3s}
+.worker.y .mark,.worker.n .mark{border:2.5px solid rgba(255,255,255,.9);background:rgba(255,255,255,.12)}
+.worker .mark svg{width:26px;height:26px;stroke:#fff;stroke-width:3.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.worker .mark path{stroke-dasharray:40;stroke-dashoffset:40}
+.worker.y .mark .t path,.worker.n .mark .x path{animation:draw .42s .12s cubic-bezier(.3,.7,.2,1) forwards}
+.worker.y .mark .x,.worker.n .mark .t,.worker:not(.y):not(.n) .mark svg{display:none}
+.worker.pop .mark{animation:pop .45s cubic-bezier(.3,1.6,.4,1)}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+.worker.still .mark path{animation:none;stroke-dashoffset:0}
+
+.quick{display:flex;gap:10px;margin-top:16px}
+.btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 12px;border-radius:16px;font-weight:700;font-size:15px;
+  background:var(--card);box-shadow:var(--shadow);transition:transform .15s}
+.btn:active{transform:scale(.96)}
+.btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.btn.pri{background:var(--ink);color:var(--bg)}
+.btn.ok{color:var(--ok)}
+.hint{font-size:13px;color:var(--ink2);text-align:center;margin:16px 8px 4px;line-height:1.5}
+.empty{text-align:center;color:var(--ink2);padding:30px 10px}
+
+/* month */
+.mHead{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.mHead h2{flex:1;margin:0;text-align:center;font-size:21px;font-weight:800}
+.mHead .nav{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+.cal{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:12px 10px}
+.calG{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.calG .h{font-size:11.5px;font-weight:700;color:var(--ink2);text-align:center;padding:2px 0 6px}
+.calG .h.su{color:var(--no)}
+.cd{aspect-ratio:1/1.08;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  font-size:15px;font-weight:700;transition:transform .15s,background .2s;position:relative}
+.cd:active{transform:scale(.9)}
+.cd.out{visibility:hidden}
+.cd.su{background:var(--sun)}
+.cd.hol{background:var(--hol);color:var(--holInk)}
+.cd.today{box-shadow:inset 0 0 0 2px var(--gold)}
+.cd.sel{background:var(--ink);color:var(--bg)}
+.cd .bar{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;max-width:90%}
+.cd .bar i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.cd .bar i.y{background:var(--ok)}.cd .bar i.n{background:var(--no)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;font-size:12px;color:var(--ink2);margin:12px 0 2px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.holList{margin-top:12px;font-size:13px;color:var(--holInk);background:var(--hol);border-radius:14px;padding:10px 14px;line-height:1.6}
+.holList[hidden]{display:none}
+.secT{font-size:13px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--ink2);margin:22px 4px 10px}
+.stat{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:10px}
+.stat .top{display:flex;align-items:baseline;gap:10px}
+.stat .top b{flex:1;font-size:22px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
+.stat .top em{font-style:normal;font-size:13px;color:var(--ink2);font-weight:600}
+.stat .track{height:10px;border-radius:999px;background:var(--line);margin:10px 0 8px;overflow:hidden;display:flex}
+.stat .track i{height:100%;transition:width .8s cubic-bezier(.2,.8,.2,1);width:0}
+.stat .track .y{background:linear-gradient(90deg,#34C77B,var(--ok))}
+.stat .track .n{background:linear-gradient(90deg,#E25A5A,var(--no))}
+.stat .nums{display:flex;gap:16px;font-size:13.5px;font-weight:600}
+.stat .nums .y{color:var(--ok)}.stat .nums .n{color:var(--no)}
+
+/* crew */
+.row{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:12px 12px 12px 16px;margin-bottom:10px;
+  animation:pageIn .3s cubic-bezier(.2,.8,.2,1)}
+.row .av{width:42px;height:42px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-weight:800;flex:none}
+.row b{flex:1;font-size:21px;font-weight:900;letter-spacing:1px;text-transform:uppercase;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--ink2);transition:background .2s,transform .15s}
+.ic:active{transform:scale(.9);background:var(--bg)}
+.ic svg{width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.ic.del{color:var(--no)}
+.box{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px;font-size:14px;line-height:1.55;color:var(--ink2)}
+.box h3{margin:0 0 6px;font-size:16px;color:var(--ink)}
+.box .quick{margin-top:12px}
+.box .btn{box-shadow:none;background:var(--bg);color:var(--ink)}
+.ver{text-align:center;font-size:11.5px;color:var(--ink2);margin:18px 0 4px;opacity:.7}
+
+/* tabs */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;padding:0 12px calc(10px + env(safe-area-inset-bottom));pointer-events:none}
+.tabsIn{pointer-events:auto;display:flex;gap:4px;background:var(--card);border-radius:24px;padding:6px;box-shadow:0 10px 30px rgba(22,35,58,.18);width:100%;max-width:440px;position:relative}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:18px;font-size:12px;font-weight:700;color:var(--ink2);position:relative;z-index:1;transition:color .25s}
+.tab svg{width:22px;height:22px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tab.on{color:var(--bg)}
+.tabInk{position:absolute;top:6px;bottom:6px;border-radius:18px;background:var(--ink);transition:left .35s cubic-bezier(.3,1.2,.4,1),width .35s;z-index:0}
+
+/* add tile */
+.addTile{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:64px;border-radius:var(--r);border:2px dashed var(--line);color:var(--ink2);font-weight:700;font-size:16px;transition:transform .15s,border-color .2s,color .2s}
+.addTile:active{transform:scale(.97);border-color:var(--gold);color:var(--ink)}
+.addTile .plus{width:34px;height:34px;border-radius:50%;background:var(--gold);color:#16233A;display:grid;place-items:center}
+.addTile svg{width:20px;height:20px;stroke:currentColor;stroke-width:2.8;fill:none;stroke-linecap:round}
+/* fab */
+.fab{position:fixed;right:max(16px,calc(50% - 304px));bottom:calc(96px + env(safe-area-inset-bottom));z-index:19;width:58px;height:58px;border-radius:50%;
+  background:var(--gold);color:#16233A;display:grid;place-items:center;box-shadow:0 10px 24px rgba(217,164,65,.45);transition:transform .2s cubic-bezier(.3,1.5,.4,1)}
+.fab:active{transform:scale(.88) rotate(90deg)}
+.fab svg{width:28px;height:28px;stroke:currentColor;stroke-width:2.8;fill:none;stroke-linecap:round}
+.fab[hidden]{display:none}
+
+/* modal */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(10,16,28,.45);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{width:100%;max-width:520px;background:var(--card);border-radius:26px 26px 0 0;padding:10px 18px calc(22px + env(safe-area-inset-bottom));
+  transform:translateY(100%);transition:transform .38s cubic-bezier(.2,.9,.2,1)}
+.scrim.on .sheet{transform:none}
+@media (min-width:700px){.scrim{align-items:center}.sheet{border-radius:26px;transform:translateY(30px) scale(.96)}}
+.grab{width:42px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 14px}
+.sheet h3{margin:0 0 6px;font-size:20px}
+.sheet p{margin:0 0 14px;color:var(--ink2);font-size:14.5px;line-height:1.5}
+.sheet input{width:100%;font:inherit;font-size:22px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:14px 16px;border-radius:14px;
+  border:2px solid var(--line);background:var(--bg);color:var(--ink);outline:none;transition:border-color .2s}
+.sheet input:focus{border-color:var(--gold)}
+.sheet .quick{margin-top:16px}
+.sheet .btn{box-shadow:none;background:var(--bg)}
+.sheet .btn.pri{background:var(--ink);color:var(--bg)}
+.sheet .btn.danger{background:var(--no);color:#fff}
+.err{color:var(--no);font-size:13px;font-weight:600;margin-top:8px;min-height:18px}
+
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));z-index:50;transform:translate(-50%,20px);opacity:0;
+  background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:14px;font-size:14px;font-weight:600;transition:all .3s cubic-bezier(.2,.8,.2,1);pointer-events:none;max-width:90%;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.install{margin-bottom:14px}
+.install[hidden]{display:none}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#D9A441"/><path d="M9 16.5l4.5 4.5L23 11.5" stroke="#16233A" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Συνεργείο</span><span class="sp"></span>
+      <button class="todayBtn" id="toToday" hidden>Σήμερα</button>
+    </div>
+    <div class="dateRow">
+      <button class="nav" id="prev" aria-label="Προηγούμενη μέρα"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div class="dateText">
+        <div class="dow" id="dow"></div>
+        <div class="dmy" id="dmy"></div>
+        <div class="holTag" id="holTag" hidden></div>
+      </div>
+      <button class="nav" id="next" aria-label="Επόμενη μέρα"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+    <div class="week" id="week"></div>
+  </header>
+
+  <main>
+    <!-- DAY -->
+    <section class="page on" id="pDay">
+      <div class="summary">
+        <div class="pill y"><div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><div><b id="cY">0</b><span>Δούλεψαν</span></div></div>
+        <div class="pill n"><div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg></div><div><b id="cN">0</b><span>Δεν δούλεψαν</span></div></div>
+      </div>
+      <div class="slider"><div class="dayList" id="dayList"></div></div>
+      <div class="quick" id="quickRow">
+        <button class="btn ok" id="allYes"><svg viewBox="0 0 24 24"><path d="M3 12.5l4 4L15 8.5M10 16.5l1 1 9-9"/></svg>Όλοι δούλεψαν</button>
+        <button class="btn" id="clearDay"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Καθαρισμός</button>
+      </div>
+      <p class="hint">Πάτα το όνομα: <b>μία φορά</b> = δούλεψε ✓, <b>δεύτερη</b> = δεν δούλεψε ✗, <b>τρίτη</b> = καθαρίζει.<br>Σύρε αριστερά ή δεξιά για άλλη μέρα.</p>
+    </section>
+
+    <!-- MONTH -->
+    <section class="page" id="pMonth">
+      <div class="mHead">
+        <button class="nav" id="mPrev" aria-label="Προηγούμενος μήνας"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <h2 id="mTitle"></h2>
+        <button class="nav" id="mNext" aria-label="Επόμενος μήνας"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+      <div class="cal"><div class="calG" id="calG"></div>
+        <div class="legend"><span><i style="background:var(--ok)"></i>Δούλεψε</span><span><i style="background:var(--no)"></i>Δεν δούλεψε</span><span><i style="background:var(--hol);box-shadow:inset 0 0 0 1px var(--holInk)"></i>Αργία</span></div>
+      </div>
+      <div class="holList" id="holList" hidden></div>
+      <div class="secT" id="statT">Σύνολο μήνα</div>
+      <div id="stats"></div>
+    </section>
+
+    <!-- CREW -->
+    <section class="page" id="pCrew">
+      <div class="box install" id="installBox">
+        <h3>Βάλε την εφαρμογή στην αρχική οθόνη</h3>
+        <div id="installTxt">Στο κινητό: άνοιξε τη σελίδα στο Chrome, πάτα τις τρεις τελείες ⋮ και μετά «Προσθήκη στην αρχική οθόνη» ή «Εγκατάσταση εφαρμογής». Στον υπολογιστή: πάτα το εικονίδιο εγκατάστασης δεξιά στη γραμμή διευθύνσεων. Δουλεύει και χωρίς ίντερνετ.</div>
+        <div class="quick" id="installBtnRow" hidden><button class="btn pri" id="installBtn">Εγκατάσταση</button></div>
+      </div>
+      <div class="secT" style="margin-top:4px">Το συνεργείο μου</div>
+      <div id="crewList"></div>
+      <div class="quick" style="margin-top:6px"><button class="btn pri" id="addBtn2"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Προσθήκη ατόμου</button></div>
+
+      <div class="secT">Αντίγραφο ασφαλείας</div>
+      <div class="box">
+        Τα στοιχεία σου μένουν μόνο σε αυτή τη συσκευή. Κράτα ένα αρχείο αντιγράφου κάθε τόσο, ή μετέφερέ το για να έχεις τα ίδια στοιχεία στο κινητό και στον υπολογιστή.
+        <div class="quick">
+          <button class="btn" id="exportBtn"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Αποθήκευση</button>
+          <button class="btn" id="importBtn"><svg viewBox="0 0 24 24"><path d="M12 20V9M7 14l5-5 5 5M5 4h14"/></svg>Επαναφορά</button>
+        </div>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+      </div>
+      <div class="ver">Έκδοση <span id="ver"></span></div>
+    </section>
+  </main>
+
+
+  <nav class="tabs"><div class="tabsIn" id="tabs">
+    <div class="tabInk" id="tabInk"></div>
+    <button class="tab on" data-p="pDay"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Ημέρα</button>
+    <button class="tab" data-p="pMonth"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Μήνας</button>
+    <button class="tab" data-p="pCrew"><svg viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.6-3.3 2.8-5 5.5-5s4.9 1.7 5.5 5"/><circle cx="17" cy="9.5" r="2.5"/><path d="M15.5 14.3c2.6-.4 4.5 1.1 5 4.2"/></svg>Συνεργείο</button>
+  </div></nav>
+</div>
+
+<div class="scrim" id="scrim"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+var VERSION = "402f014c92";
+var KEY = "synergeio.v1";
+var DAYS = ["Κυριακή","Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο"];
+var DSHORT = ["Κυρ","Δευ","Τρι","Τετ","Πεμ","Παρ","Σαβ"];
+var MONTHS = ["Ιανουάριος","Φεβρουάριος","Μάρτιος","Απρίλιος","Μάιος","Ιούνιος","Ιούλιος","Αύγουστος","Σεπτέμβριος","Οκτώβριος","Νοέμβριος","Δεκέμβριος"];
+var MGEN = ["Ιανουαρίου","Φεβρουαρίου","Μαρτίου","Απριλίου","Μαΐου","Ιουνίου","Ιουλίου","Αυγούστου","Σεπτεμβρίου","Οκτωβρίου","Νοεμβρίου","Δεκεμβρίου"];
+
+/* ---------- dates ---------- */
+function pad(n){return (n<10?"0":"")+n}
+function key(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function parse(k){var p=k.split("-");return new Date(+p[0],+p[1]-1,+p[2])}
+function addDays(d,n){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);return x}
+function today(){var n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate())}
+function mondayOf(d){var w=(d.getDay()+6)%7;return addDays(d,-w)}
+
+/* Orthodox Easter (Julian computus, +13 days for 1900-2099) */
+function orthodoxEaster(y){
+  var a=y%4,b=y%7,c=y%19,d=(19*c+15)%30,e=(2*a+4*b-d+34)%7;
+  var m=Math.floor((d+e+114)/31),day=((d+e+114)%31)+1;
+  return new Date(y,m-1,day+13);
+}
+var holCache={};
+function holidays(y){
+  if(holCache[y])return holCache[y];
+  var h={},E=orthodoxEaster(y);
+  function put(k,n){h[k]=h[k]?h[k]+" · "+n:n}
+  function f(m,d,n){put(key(new Date(y,m-1,d)),n)}
+  function r(o,n){put(key(addDays(E,o)),n)}
+  f(1,1,"Πρωτοχρονιά");f(1,6,"Θεοφάνεια");
+  r(-48,"Καθαρά Δευτέρα");
+  f(3,25,"Ευαγγελισμός · 25η Μαρτίου");
+  r(-2,"Μεγάλη Παρασκευή");r(-1,"Μεγάλο Σάββατο");r(0,"Κυριακή του Πάσχα");r(1,"Δευτέρα του Πάσχα");
+  f(5,1,"Πρωτομαγιά");
+  r(50,"Αγίου Πνεύματος");
+  f(8,15,"Κοίμηση της Θεοτόκου");f(10,28,"Επέτειος του «Όχι»");
+  f(12,24,"Παραμονή Χριστουγέννων");f(12,25,"Χριστούγεννα");f(12,26,"Σύναξη της Θεοτόκου");f(12,31,"Παραμονή Πρωτοχρονιάς");
+  holCache[y]=h;return h;
+}
+/* days that are real public holidays (others are just shown) */
+var SOFT={"Μεγάλο Σάββατο":1,"Παραμονή Χριστουγέννων":1,"Παραμονή Πρωτοχρονιάς":1};
+function holOf(d){return holidays(d.getFullYear())[key(d)]||""}
+
+/* ---------- state ---------- */
+var S;
+function uid(){return "w"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function fresh(){return {workers:["ACHMET","SINAN","KENAN"].map(function(n,i){return {id:"w"+(i+1),name:n,active:true}}),marks:{}}}
+function load(){
+  try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&o.workers&&o.marks)return o}}catch(e){}
+  return fresh();
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("Δεν έγινε αποθήκευση στη συσκευή")}}
+S=load();
+function active(){return S.workers.filter(function(w){return w.active})}
+function markOf(k,id){return (S.marks[k]||{})[id]||""}
+function setMark(k,id,v){
+  if(!S.marks[k])S.marks[k]={};
+  if(v)S.marks[k][id]=v;else delete S.marks[k][id];
+  if(!Object.keys(S.marks[k]).length)delete S.marks[k];
+  save();
+}
+/* workers shown for a given day: active ones + removed ones that have a mark on that day */
+function workersFor(k){var m=S.marks[k]||{};return S.workers.filter(function(w){return w.active||m[w.id]})}
+
+/* ---------- ui helpers ---------- */
+var $=function(id){return document.getElementById(id)};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function initials(n){n=n.trim();return (n[0]||"?").toUpperCase()}
+var tT;function toast(t){var e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(tT);tT=setTimeout(function(){e.classList.remove("on")},2200)}
+function buzz(ms){try{if(navigator.vibrate)navigator.vibrate(ms)}catch(e){}}
+var TICK='<svg class="t" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+var XX='<svg class="x" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg>';
+
+var cur=today(), monthCur=new Date(cur.getFullYear(),cur.getMonth(),1), page="pDay";
+
+/* ---------- header ---------- */
+function renderHeader(){
+  var t=today();
+  $("dow").textContent=DAYS[cur.getDay()];
+  $("dmy").textContent=cur.getDate()+" "+MGEN[cur.getMonth()]+" "+cur.getFullYear();
+  var h=holOf(cur);$("holTag").hidden=!h;$("holTag").textContent=h?("★ "+h):"";
+  $("toToday").hidden=key(cur)===key(t);
+  var m=mondayOf(cur),html="";
+  for(var i=0;i<7;i++){
+    var d=addDays(m,i),k=key(d),ws=workersFor(k),bar="";
+    ws.forEach(function(w){var v=markOf(k,w.id);bar+='<i class="'+v+'"></i>'});
+    html+='<button class="wd'+(k===key(cur)?" sel":"")+(k===key(t)?" today":"")+(holOf(d)?" hol":"")+'" data-k="'+k+'"><span class="s">'+DSHORT[d.getDay()]+'</span><span class="n">'+d.getDate()+'</span><span class="bar">'+bar+'</span></button>';
+  }
+  $("week").innerHTML=html;
+}
+
+/* ---------- day ---------- */
+function renderDay(){
+  var k=key(cur),ws=workersFor(k),html="",y=0,n=0;
+  ws.forEach(function(w){
+    var v=markOf(k,w.id);if(v==="y")y++;if(v==="n")n++;
+    var sub=v==="y"?"Δούλεψε σήμερα":v==="n"?"Δεν δούλεψε":"Πάτα για σημείωση";
+    if(k!==key(today())&&v)sub=v==="y"?"Δούλεψε":"Δεν δούλεψε";
+    if(!w.active)sub+=" · αφαιρέθηκε";
+    html+='<button class="worker still '+v+'" data-id="'+w.id+'"><span class="bgY"></span><span class="bgN"></span><span class="av">'+esc(initials(w.name))+'</span><span class="nm"><b>'+esc(w.name)+'</b><span>'+sub+'</span></span><span class="mark">'+TICK+XX+'</span></button>';
+  });
+  if(!ws.length)html='<div class="empty">Δεν υπάρχει κανένα άτομο ακόμα.</div>';
+  html+='<button class="addTile"><span class="plus"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>Προσθήκη ατόμου</button>';
+  $("dayList").innerHTML=html;
+  $("quickRow").style.display=ws.length?"":"none";
+  countTo($("cY"),y);countTo($("cN"),n);
+}
+function countTo(el,v){
+  var from=+el.textContent||0;if(from===v){el.textContent=v;return}
+  el.animate&&el.animate([{transform:"scale(1.35)"},{transform:"scale(1)"}],{duration:320,easing:"cubic-bezier(.3,1.5,.4,1)"});
+  el.textContent=v;
+}
+function tapWorker(btn,ev){
+  var id=btn.getAttribute("data-id"),k=key(cur),v=markOf(k,id);
+  var nv=v===""?"y":v==="y"?"n":"";
+  setMark(k,id,nv);
+  // ripple fill from the tap point
+  var r=btn.getBoundingClientRect(),x=(ev&&ev.clientX!=null&&ev.clientX>0?ev.clientX:r.left+r.width-40)-r.left,y=(ev&&ev.clientY>0?ev.clientY:r.top+r.height/2)-r.top;
+  btn.classList.remove("still","y","n","pop");
+  if(nv){
+    var f=document.createElement("span");f.className="fill";
+    f.style.left=x+"px";f.style.top=y+"px";
+    f.style.background=nv==="y"?"var(--ok)":"var(--no)";
+    var far=Math.hypot(Math.max(x,r.width-x),Math.max(y,r.height-y));
+    f.style.setProperty("--s",(far*2.2/10).toFixed(1));
+    btn.insertBefore(f,btn.firstChild);
+    requestAnimationFrame(function(){f.classList.add("go")});
+    setTimeout(function(){f.remove()},700);
+  }
+  void btn.offsetWidth;
+  if(nv)btn.classList.add(nv,"pop");
+  var sub=btn.querySelector(".nm span"),isT=k===key(today());
+  sub.textContent=nv==="y"?(isT?"Δούλεψε σήμερα":"Δούλεψε"):nv==="n"?"Δεν δούλεψε":"Πάτα για σημείωση";
+  buzz(nv==="y"?18:nv==="n"?[14,40,14]:8);
+  var ws=workersFor(k),yy=0,nn=0;ws.forEach(function(w){var m=markOf(k,w.id);if(m==="y")yy++;if(m==="n")nn++});
+  countTo($("cY"),yy);countTo($("cN"),nn);
+  renderHeader();
+}
+function goDay(d,dir){
+  var list=$("dayList");
+  if(!dir){cur=d;renderHeader();renderDay();return}
+  list.className="dayList "+(dir>0?"outL":"outR");
+  setTimeout(function(){cur=d;renderHeader();renderDay();list.className="dayList "+(dir>0?"inL":"inR");setTimeout(function(){list.className="dayList"},340)},170);
+}
+
+/* ---------- month ---------- */
+function renderMonth(){
+  var y=monthCur.getFullYear(),m=monthCur.getMonth();
+  $("mTitle").textContent=MONTHS[m]+" "+y;
+  var html="";["Δε","Τρ","Τε","Πε","Πα","Σα","Κυ"].forEach(function(h,i){html+='<div class="h'+(i===6?" su":"")+'">'+h+'</div>'});
+  var first=new Date(y,m,1),lead=(first.getDay()+6)%7,dim=new Date(y,m+1,0).getDate(),tk=key(today()),hl=[];
+  for(var i=0;i<lead;i++)html+='<div class="cd out"></div>';
+  for(var d=1;d<=dim;d++){
+    var dt=new Date(y,m,d),k=key(dt),h=holOf(dt),bar="";
+    workersFor(k).forEach(function(w){var v=markOf(k,w.id);if(v)bar+='<i class="'+v+'"></i>'});
+    if(h)hl.push(d+" "+MGEN[m]+": "+h+(SOFT[h]?"":""));
+    html+='<button class="cd'+(dt.getDay()===0?" su":"")+(h?" hol":"")+(k===tk?" today":"")+(k===key(cur)?" sel":"")+'" data-k="'+k+'"'+(h?' title="'+esc(h)+'"':"")+'>'+d+'<span class="bar">'+bar+'</span></button>';
+  }
+  $("calG").innerHTML=html;
+  $("holList").hidden=!hl.length;$("holList").innerHTML=hl.length?"<b>Γιορτές και αργίες:</b><br>"+hl.map(esc).join("<br>"):"";
+  // stats
+  var mk=y+"-"+pad(m+1)+"-",ids={},sh="";
+  Object.keys(S.marks).forEach(function(k){if(k.indexOf(mk)===0)Object.keys(S.marks[k]).forEach(function(id){ids[id]=1})});
+  var list=S.workers.filter(function(w){return w.active||ids[w.id]});
+  $("statT").textContent="Σύνολο · "+MONTHS[m];
+  list.forEach(function(w){
+    var yy=0,nn=0;
+    for(var d=1;d<=dim;d++){var v=markOf(mk+pad(d),w.id);if(v==="y")yy++;else if(v==="n")nn++}
+    var tot=yy+nn;
+    sh+='<div class="stat"><div class="top"><b>'+esc(w.name)+'</b><em>'+(tot?Math.round(yy*100/tot)+"% παρουσία":"χωρίς σημειώσεις")+'</em></div>'+
+      '<div class="track"><i class="y" data-w="'+(tot?yy*100/tot:0)+'"></i><i class="n" data-w="'+(tot?nn*100/tot:0)+'"></i></div>'+
+      '<div class="nums"><span class="y">✓ '+yy+' '+(yy===1?"μέρα":"μέρες")+' δούλεψε</span><span class="n">✗ '+nn+' '+(nn===1?"μέρα":"μέρες")+' όχι</span></div></div>';
+  });
+  if(!list.length)sh='<div class="empty">Κανένα άτομο.</div>';
+  $("stats").innerHTML=sh;
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    [].forEach.call(document.querySelectorAll(".track i"),function(i){i.style.width=i.getAttribute("data-w")+"%"});
+  })});
+}
+
+/* ---------- crew ---------- */
+var PEN='<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"/></svg>';
+var BIN='<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>';
+function renderCrew(){
+  var html="";
+  active().forEach(function(w){
+    html+='<div class="row" data-id="'+w.id+'"><span class="av">'+esc(initials(w.name))+'</span><b>'+esc(w.name)+'</b><button class="ic" data-a="ren" aria-label="Μετονομασία">'+PEN+'</button><button class="ic del" data-a="del" aria-label="Αφαίρεση">'+BIN+'</button></div>';
+  });
+  if(!active().length)html='<div class="empty">Δεν υπάρχει κανένα άτομο.</div>';
+  $("crewList").innerHTML=html;
+}
+
+/* ---------- sheet (modal) ---------- */
+function openSheet(html,onOpen){
+  $("sheet").innerHTML='<div class="grab"></div>'+html;$("scrim").classList.add("on");
+  if(onOpen)setTimeout(onOpen,60);
+}
+function closeSheet(){$("scrim").classList.remove("on");document.activeElement&&document.activeElement.blur&&document.activeElement.blur()}
+$("scrim").addEventListener("click",function(e){if(e.target.id==="scrim")closeSheet()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeSheet()});
+
+function nameSheet(title,txt,val,okLabel,onOk){
+  openSheet('<h3>'+title+'</h3><p>'+txt+'</p><input id="nmIn" maxlength="24" autocomplete="off" autocapitalize="characters" placeholder="Όνομα" value="'+esc(val||"")+'"><div class="err" id="nmErr"></div>'+
+    '<div class="quick"><button class="btn" id="nmNo">Άκυρο</button><button class="btn pri" id="nmOk">'+okLabel+'</button></div>',function(){var i=$("nmIn");i.focus();i.select()});
+  function go(){
+    var v=$("nmIn").value.replace(/\s+/g," ").trim().toLocaleUpperCase("el");
+    if(!v){$("nmErr").textContent="Γράψε ένα όνομα.";return}
+    var r=onOk(v);if(r){$("nmErr").textContent=r;return}
+    closeSheet();
+  }
+  $("nmOk").onclick=go;$("nmNo").onclick=closeSheet;
+  $("nmIn").onkeydown=function(e){if(e.key==="Enter")go()};
+}
+function dup(v,skip){return active().some(function(w){return w.id!==skip&&w.name.toLocaleUpperCase("el")===v})}
+function addPerson(){
+  nameSheet("Νέο άτομο","Γράψε το όνομα του εργάτη. Θα εμφανίζεται με κεφαλαία.","","Προσθήκη",function(v){
+    if(dup(v))return "Υπάρχει ήδη άτομο με αυτό το όνομα.";
+    // bring back a removed person with the same name, keeps their history
+    var old=S.workers.filter(function(w){return !w.active&&w.name.toLocaleUpperCase("el")===v})[0];
+    if(old){old.active=true;S.workers.splice(S.workers.indexOf(old),1);S.workers.push(old)}
+    else S.workers.push({id:uid(),name:v,active:true});
+    save();renderAll();toast("Προστέθηκε: "+v);buzz(15);
+  });
+}
+function renamePerson(id){
+  var w=S.workers.filter(function(x){return x.id===id})[0];if(!w)return;
+  nameSheet("Μετονομασία","Οι μέρες που έχεις σημειώσει μένουν ίδιες.",w.name,"Αποθήκευση",function(v){
+    if(dup(v,id))return "Υπάρχει ήδη άτομο με αυτό το όνομα.";
+    w.name=v;save();renderAll();toast("Αποθηκεύτηκε");
+  });
+}
+function removePerson(id){
+  var w=S.workers.filter(function(x){return x.id===id})[0];if(!w)return;
+  openSheet('<h3>Αφαίρεση: '+esc(w.name)+';</h3><p>Δεν θα εμφανίζεται πια στις νέες μέρες. Οι μέρες που έχεις ήδη σημειώσει μένουν στο ιστορικό.</p>'+
+    '<div class="quick"><button class="btn" id="dNo">Άκυρο</button><button class="btn danger" id="dOk">Αφαίρεση</button></div>');
+  $("dNo").onclick=closeSheet;
+  $("dOk").onclick=function(){
+    var used=Object.keys(S.marks).some(function(k){return S.marks[k][id]});
+    if(used)w.active=false;else S.workers.splice(S.workers.indexOf(w),1);
+    save();closeSheet();renderAll();toast("Αφαιρέθηκε: "+w.name);
+  };
+}
+
+/* ---------- backup ---------- */
+$("exportBtn").onclick=function(){
+  var blob=new Blob([JSON.stringify({app:"synergeio",v:1,saved:new Date().toISOString(),data:S},null,1)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="synergeio-"+key(today())+".json";
+  document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
+  toast("Το αρχείο αποθηκεύτηκε");
+};
+$("importBtn").onclick=function(){$("importFile").click()};
+$("importFile").onchange=function(){
+  var f=this.files[0];this.value="";if(!f)return;
+  var rd=new FileReader();rd.onload=function(){
+    try{var o=JSON.parse(rd.result),d=o.data||o;if(!d.workers||!d.marks)throw 0;
+      openSheet('<h3>Επαναφορά αρχείου;</h3><p>Τα στοιχεία αυτής της συσκευής θα αντικατασταθούν με τα στοιχεία του αρχείου ('+d.workers.filter(function(w){return w.active}).length+' άτομα, '+Object.keys(d.marks).length+' μέρες).</p>'+
+        '<div class="quick"><button class="btn" id="iNo">Άκυρο</button><button class="btn pri" id="iOk">Επαναφορά</button></div>');
+      $("iNo").onclick=closeSheet;
+      $("iOk").onclick=function(){S=d;save();closeSheet();renderAll();toast("Έγινε επαναφορά")};
+    }catch(e){toast("Αυτό το αρχείο δεν είναι αντίγραφο της εφαρμογής")}
+  };rd.readAsText(f);
+};
+
+/* ---------- tabs ---------- */
+function moveInk(){
+  var on=document.querySelector(".tab.on"),ink=$("tabInk");if(!on)return;
+  ink.style.left=on.offsetLeft+"px";ink.style.width=on.offsetWidth+"px";
+}
+function show(p){
+  page=p;
+  [].forEach.call(document.querySelectorAll(".tab"),function(t){t.classList.toggle("on",t.getAttribute("data-p")===p)});
+  [].forEach.call(document.querySelectorAll(".page"),function(s){s.classList.toggle("on",s.id===p)});
+  moveInk();
+    if(p==="pMonth"){monthCur=new Date(cur.getFullYear(),cur.getMonth(),1);renderMonth()}
+  if(p==="pCrew")renderCrew();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$("tabs").addEventListener("click",function(e){var t=e.target.closest(".tab");if(t)show(t.getAttribute("data-p"))});
+window.addEventListener("resize",moveInk);
+
+/* ---------- events ---------- */
+$("dayList").addEventListener("click",function(e){var b=e.target.closest(".worker");if(b)tapWorker(b,e)});
+$("prev").onclick=function(){if(page!=="pDay")show("pDay");goDay(addDays(cur,-1),-1)};
+$("next").onclick=function(){if(page!=="pDay")show("pDay");goDay(addDays(cur,1),1)};
+$("toToday").onclick=function(){var t=today(),d=key(t)<key(cur)?-1:1;if(page!=="pDay")show("pDay");goDay(t,d)};
+$("week").addEventListener("click",function(e){var b=e.target.closest(".wd");if(!b)return;var d=parse(b.getAttribute("data-k"));
+  if(page!=="pDay")show("pDay");if(key(d)!==key(cur))goDay(d,d>cur?1:-1)});
+$("mPrev").onclick=function(){monthCur=new Date(monthCur.getFullYear(),monthCur.getMonth()-1,1);renderMonth()};
+$("mNext").onclick=function(){monthCur=new Date(monthCur.getFullYear(),monthCur.getMonth()+1,1);renderMonth()};
+$("calG").addEventListener("click",function(e){var b=e.target.closest(".cd");if(!b||b.classList.contains("out"))return;
+  var d=parse(b.getAttribute("data-k"));show("pDay");goDay(d,0)});
+$("allYes").onclick=function(){
+  var k=key(cur);workersFor(k).forEach(function(w){if(w.active)setMark(k,w.id,"y")});
+  renderHeader();renderDay();[].forEach.call(document.querySelectorAll(".worker.y"),function(b,i){b.classList.remove("still");b.style.animation="pageIn .35s "+(i*60)+"ms both"});
+  buzz(20);
+};
+$("clearDay").onclick=function(){
+  var k=key(cur);if(!S.marks[k]){toast("Δεν υπάρχει τίποτα για καθαρισμό");return}
+  var keep=S.marks[k];delete S.marks[k];save();renderHeader();renderDay();
+  toast("Η μέρα καθαρίστηκε");undoBuf={k:k,m:keep};
+};
+var undoBuf=null;
+$("dayList").addEventListener("click",function(e){if(e.target.closest(".addTile"))addPerson()});$("addBtn2").onclick=addPerson;
+$("crewList").addEventListener("click",function(e){var b=e.target.closest(".ic");if(!b)return;var id=b.closest(".row").getAttribute("data-id");
+  if(b.getAttribute("data-a")==="ren")renamePerson(id);else removePerson(id)});
+
+/* swipe between days */
+var sx=null,sy=0;
+var area=document.querySelector("main");
+area.addEventListener("touchstart",function(e){if(page!=="pDay"||e.touches.length>1){sx=null;return}sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+area.addEventListener("touchend",function(e){if(sx===null)return;var dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;sx=null;
+  if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){goDay(addDays(cur,dx<0?1:-1),dx<0?1:-1)}},{passive:true});
+document.addEventListener("keydown",function(e){if(page!=="pDay"||$("scrim").classList.contains("on"))return;
+  if(e.key==="ArrowLeft")$("prev").click();if(e.key==="ArrowRight")$("next").click()});
+
+/* new day while the app stays open */
+var lastToday=key(today());
+function checkDay(){var t=key(today());if(t!==lastToday){var wasToday=key(cur)===lastToday;lastToday=t;if(wasToday)cur=today();renderAll()}}
+setInterval(checkDay,30000);document.addEventListener("visibilitychange",function(){if(!document.hidden)checkDay()});
+
+function renderAll(){renderHeader();renderDay();if(page==="pMonth")renderMonth();if(page==="pCrew")renderCrew()}
+
+/* install */
+var deferred=null;
+var standalone=window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches;
+if(standalone)$("installBox").hidden=true;
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;$("installBtnRow").hidden=false});
+$("installBtn").onclick=function(){if(!deferred)return;deferred.prompt();deferred.userChoice.then(function(){deferred=null;$("installBtnRow").hidden=true})};
+window.addEventListener("appinstalled",function(){$("installBox").hidden=true;toast("Η εφαρμογή εγκαταστάθηκε")});
+
+$("ver").textContent=VERSION;
+renderAll();requestAnimationFrame(moveInk);
+
+/* offline + auto update: a new version loads on first open */
+if("serviceWorker" in navigator&&location.protocol!=="file:"){
+  var had=!!navigator.serviceWorker.controller,reloaded=false;
+  navigator.serviceWorker.register("sw.js").then(function(r){r.update()}).catch(function(){});
+  navigator.serviceWorker.addEventListener("controllerchange",function(){if(had&&!reloaded){reloaded=true;location.reload()}});
+}
+window.__crew={S:function(){return S},orthodoxEaster:orthodoxEaster,holidays:holidays,goDay:function(k){goDay(parse(k),0)},show:show};
+})();
+</script>
+</body>
+</html>
